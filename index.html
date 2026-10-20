@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대학병원 진료과 안내·예약</title>
+<style>
+  :root { --bg:#f2f6fa; --card:#fff; --text:#1d2733; --muted:#6b7a89; --primary:#1b6ec2; --user:#1b6ec2; --bot:#eaf1f8; --border:#d9e2ec; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1720; --card:#17212c; --text:#e6edf3; --muted:#8b9bab; --primary:#4a9be8; --user:#2b6cb0; --bot:#223140; --border:#2a3948; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Malgun Gothic", sans-serif; background:var(--bg); color:var(--text); }
+  .wrap { max-width:720px; margin:0 auto; height:100vh; display:flex; flex-direction:column; padding:16px; }
+  header { padding:4px 4px 12px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .notice { font-size:13px; color:var(--muted); margin:0; }
+  #chat { flex:1; overflow-y:auto; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .msg { max-width:82%; padding:10px 14px; border-radius:14px; line-height:1.55; white-space:pre-wrap; word-break:break-word; }
+  .bot { background:var(--bot); align-self:flex-start; border-bottom-left-radius:4px; }
+  .user { background:var(--user); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+  .typing { color:var(--muted); font-style:italic; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .chips button { border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:999px; padding:6px 12px; cursor:pointer; font-size:13px; }
+  .chips button:hover { border-color:var(--primary); color:var(--primary); }
+  form { display:flex; gap:8px; margin-top:12px; }
+  input { flex:1; padding:12px 14px; font-size:16px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); }
+  input:focus { outline:2px solid var(--primary); border-color:transparent; }
+  .send { padding:0 20px; font-size:15px; border:0; border-radius:10px; background:var(--primary); color:#fff; cursor:pointer; }
+  .send:disabled { opacity:.5; cursor:default; }
+  .reset { background:none; border:0; color:var(--muted); cursor:pointer; font-size:13px; text-decoration:underline; padding:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏥 대학병원 진료과 안내·예약</h1>
+    <p class="notice">증상, 아픈 기간, 아픈 정도를 알려주시면 알맞은 진료과를 추천하고 예약을 도와드려요.<br>
+      참고용 안내이며 진단이 아닙니다. 응급 상황이면 119로 연락하세요. · <button class="reset" id="reset" type="button">대화 초기화</button></p>
+  </header>
+
+  <div id="chat"></div>
+
+  <div class="chips" id="chips">
+    <button type="button">3일 전부터 목이 아프고 콧물이 나요. 아픈 정도는 4예요</button>
+    <button type="button">일주일째 무릎이 아파요. 계단 오를 때 7점 정도예요</button>
+    <button type="button">어제부터 두통이 심해요 (8점)</button>
+  </div>
+
+  <form id="form">
+    <input id="input" type="text" placeholder="증상을 입력하세요" autocomplete="off" autofocus>
+    <button class="send" id="send" type="submit">전송</button>
+  </form>
+</div>
+
+<script>
+  const chat = document.getElementById("chat");
+  const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  const send = document.getElementById("send");
+  const chips = document.getElementById("chips");
+
+  let sessionId = null;
+  try { sessionId = localStorage.getItem("sid"); } catch (e) {}
+
+  function add(text, who) {
+    const d = document.createElement("div");
+    d.className = "msg " + who;
+    d.textContent = text;          // textContent: 모델 응답을 HTML로 해석하지 않음
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+    return d;
+  }
+
+  function greet() {
+    add("안녕하세요! 어디가 어떻게 불편하세요? 증상, 아픈 기간, 아픈 정도(1~10)를 알려주세요.", "bot");
+  }
+
+  async function ask(text) {
+    chips.style.display = "none";
+    add(text, "user");
+    const wait = add("답변 작성 중...", "bot typing");
+    send.disabled = true;
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, session_id: sessionId }),
+      });
+      const data = await res.json();
+      if (data.session_id) {
+        sessionId = data.session_id;
+        try { localStorage.setItem("sid", sessionId); } catch (e) {}
+      }
+      wait.className = "msg bot";
+      wait.textContent = data.reply || data.error || "오류가 발생했습니다.";
+    } catch (e) {
+      wait.className = "msg bot";
+      wait.textContent = "서버에 연결할 수 없습니다. python app.py 가 실행 중인지 확인하세요.";
+    }
+    send.disabled = false;
+    input.focus();
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || send.disabled) return;
+    input.value = "";
+    ask(text);
+  });
+
+  chips.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => ask(b.textContent)));
+
+  document.getElementById("reset").addEventListener("click", async () => {
+    try { await fetch("/api/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ session_id: sessionId }) }); } catch (e) {}
+    sessionId = null;
+    try { localStorage.removeItem("sid"); } catch (e) {}
+    chat.innerHTML = "";
+    chips.style.display = "flex";
+    greet();
+  });
+
+  greet();
+</script>
+</body>
+</html>
