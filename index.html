@@ -3,55 +3,147 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>대학병원 진료과 안내·예약</title>
+<title>대학병원 진료 안내·예약</title>
 <style>
-  :root { --bg:#f2f6fa; --card:#fff; --text:#1d2733; --muted:#6b7a89; --primary:#1b6ec2; --user:#1b6ec2; --bot:#eaf1f8; --border:#d9e2ec; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0f1720; --card:#17212c; --text:#e6edf3; --muted:#8b9bab; --primary:#4a9be8; --user:#2b6cb0; --bot:#223140; --border:#2a3948; }
+  :root {
+    --bg:#eef4f7; --card:#ffffff; --text:#17313f; --muted:#5f7684; --border:#d6e3ea;
+    --primary:#0b7a8f; --primary-dark:#075b6b; --primary-soft:#e3f3f6;
+    --bot:#eef6f8; --user:#0b7a8f; --alert:#c62828; --alert-soft:#fdecea;
   }
-  * { box-sizing: border-box; }
-  body { margin:0; font-family: system-ui, "Malgun Gothic", sans-serif; background:var(--bg); color:var(--text); }
-  .wrap { max-width:720px; margin:0 auto; height:100vh; display:flex; flex-direction:column; padding:16px; }
-  header { padding:4px 4px 12px; }
-  h1 { font-size:20px; margin:0 0 4px; }
-  .notice { font-size:13px; color:var(--muted); margin:0; }
-  #chat { flex:1; overflow-y:auto; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:10px; }
-  .msg { max-width:82%; padding:10px 14px; border-radius:14px; line-height:1.55; white-space:pre-wrap; word-break:break-word; }
-  .bot { background:var(--bot); align-self:flex-start; border-bottom-left-radius:4px; }
-  .user { background:var(--user); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
-  .typing { color:var(--muted); font-style:italic; }
-  .chips { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
-  .chips button { border:1px solid var(--border); background:var(--card); color:var(--text); border-radius:999px; padding:6px 12px; cursor:pointer; font-size:13px; }
-  .chips button:hover { border-color:var(--primary); color:var(--primary); }
-  form { display:flex; gap:8px; margin-top:12px; }
-  input { flex:1; padding:12px 14px; font-size:16px; border:1px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0e1a20; --card:#15262e; --text:#e4f0f4; --muted:#8fa8b4; --border:#25404c;
+      --primary:#2bb3c9; --primary-dark:#0b7a8f; --primary-soft:#173842;
+      --bot:#1b303a; --user:#0e8aa1; --alert:#ff8a80; --alert-soft:#3a1f1f;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif; background:var(--bg); color:var(--text); }
+
+  /* 상단 바 */
+  .topbar { background:var(--primary-dark); color:#fff; }
+  .topbar-in { max-width:1040px; margin:0 auto; padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .logo { width:40px; height:40px; border-radius:10px; background:#fff; display:grid; place-items:center; flex:none; }
+  .logo svg { width:26px; height:26px; }
+  .brand b { display:block; font-size:18px; letter-spacing:-.2px; }
+  .brand span { font-size:12px; opacity:.85; }
+  .emg { margin-left:auto; background:var(--alert-soft); color:var(--alert); border-radius:999px; padding:6px 14px; font-size:13px; font-weight:700; white-space:nowrap; }
+
+  /* 레이아웃 */
+  .layout { max-width:1040px; margin:0 auto; padding:16px; display:grid; grid-template-columns:1fr 280px; gap:16px; align-items:start; }
+  .panel { background:var(--card); border:1px solid var(--border); border-radius:14px; }
+
+  /* 채팅 */
+  .chatbox { display:flex; flex-direction:column; height:calc(100vh - 110px); min-height:480px; }
+  .chat-head { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .dot { width:9px; height:9px; border-radius:50%; background:#2e9e5b; box-shadow:0 0 0 3px rgba(46,158,91,.2); }
+  .chat-head b { font-size:15px; }
+  .chat-head small { color:var(--muted); }
+  .reset { margin-left:auto; background:none; border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:5px 10px; cursor:pointer; font-size:12px; }
+  .reset:hover { color:var(--primary); border-color:var(--primary); }
+  #chat { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .row { display:flex; gap:8px; align-items:flex-end; }
+  .row.user { justify-content:flex-end; }
+  .avatar { width:30px; height:30px; border-radius:50%; background:var(--primary); display:grid; place-items:center; flex:none; }
+  .avatar svg { width:18px; height:18px; }
+  .msg { max-width:78%; padding:10px 14px; border-radius:16px; line-height:1.6; white-space:pre-wrap; word-break:break-word; font-size:15px; }
+  .bot .msg, .row:not(.user) .msg { background:var(--bot); border:1px solid var(--border); border-bottom-left-radius:4px; }
+  .row.user .msg { background:var(--user); color:#fff; border-bottom-right-radius:4px; }
+  .typing .msg { color:var(--muted); }
+  .typing .msg::after { content:""; display:inline-block; width:1.2em; text-align:left; animation:dots 1.2s steps(4) infinite; }
+  @keyframes dots { 0%{content:""} 25%{content:"."} 50%{content:".."} 75%{content:"..."} }
+
+  .chips { display:flex; flex-wrap:wrap; gap:8px; padding:0 18px 12px; }
+  .chips button { border:1px solid var(--border); background:var(--primary-soft); color:var(--primary-dark); border-radius:999px; padding:7px 13px; cursor:pointer; font-size:13px; }
+  @media (prefers-color-scheme: dark) { .chips button { color:var(--text); } }
+  .chips button:hover { border-color:var(--primary); }
+
+  form { display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--border); }
+  input { flex:1; padding:12px 14px; font-size:16px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); }
   input:focus { outline:2px solid var(--primary); border-color:transparent; }
-  .send { padding:0 20px; font-size:15px; border:0; border-radius:10px; background:var(--primary); color:#fff; cursor:pointer; }
+  .send { padding:0 22px; font-size:15px; font-weight:600; border:0; border-radius:10px; background:var(--primary); color:#fff; cursor:pointer; }
+  .send:hover { background:var(--primary-dark); }
   .send:disabled { opacity:.5; cursor:default; }
-  .reset { background:none; border:0; color:var(--muted); cursor:pointer; font-size:13px; text-decoration:underline; padding:0; }
+
+  /* 안내 패널 */
+  .side { display:flex; flex-direction:column; gap:12px; }
+  .side .panel { padding:16px; }
+  .side h3 { margin:0 0 10px; font-size:14px; color:var(--primary-dark); display:flex; align-items:center; gap:6px; }
+  @media (prefers-color-scheme: dark) { .side h3 { color:var(--primary); } }
+  .side ul { margin:0; padding:0; list-style:none; font-size:13px; color:var(--muted); line-height:1.9; }
+  .side li b { color:var(--text); font-weight:600; display:inline-block; min-width:64px; }
+  .steps { counter-reset:s; }
+  .steps li { counter-increment:s; position:relative; padding-left:26px; }
+  .steps li::before { content:counter(s); position:absolute; left:0; top:4px; width:18px; height:18px; border-radius:50%; background:var(--primary); color:#fff; font-size:11px; display:grid; place-items:center; line-height:1; }
+  .alert { background:var(--alert-soft); border-color:transparent !important; }
+  .alert h3 { color:var(--alert) !important; }
+  .alert p { margin:0; font-size:13px; line-height:1.6; }
+  .notice { font-size:12px; color:var(--muted); text-align:center; padding:4px 16px 20px; max-width:1040px; margin:0 auto; }
+
+  @media (max-width:860px) {
+    .layout { grid-template-columns:1fr; padding:10px; }
+    .side { order:2; }
+    .chatbox { height:calc(100vh - 90px); }
+    .brand span, .emg { display:none; }
+    .msg { max-width:86%; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🏥 대학병원 진료과 안내·예약</h1>
-    <p class="notice">증상, 아픈 기간, 아픈 정도를 알려주시면 알맞은 진료과를 추천하고 예약을 도와드려요.<br>
-      참고용 안내이며 진단이 아닙니다. 응급 상황이면 119로 연락하세요. · <button class="reset" id="reset" type="button">대화 초기화</button></p>
-  </header>
-
-  <div id="chat"></div>
-
-  <div class="chips" id="chips">
-    <button type="button">3일 전부터 목이 아프고 콧물이 나요. 아픈 정도는 4예요</button>
-    <button type="button">일주일째 무릎이 아파요. 계단 오를 때 7점 정도예요</button>
-    <button type="button">어제부터 두통이 심해요 (8점)</button>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path fill="#0b7a8f" d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>
+    </div>
+    <div class="brand"><b>대학병원 진료 안내·예약</b><span>AI 진료과 추천 및 예약 도우미</span></div>
+    <div class="emg">🚑 응급 시 119</div>
   </div>
+</header>
 
-  <form id="form">
-    <input id="input" type="text" placeholder="증상을 입력하세요" autocomplete="off" autofocus>
-    <button class="send" id="send" type="submit">전송</button>
-  </form>
-</div>
+<main class="layout">
+  <section class="panel chatbox">
+    <div class="chat-head">
+      <span class="dot"></span><b>AI 진료 상담</b><small>증상 입력 → 진료과 추천 → 예약</small>
+      <button class="reset" id="reset" type="button">대화 초기화</button>
+    </div>
+    <div id="chat"></div>
+    <div class="chips" id="chips">
+      <button type="button">3일 전부터 목이 아프고 콧물이 나요. 아픈 정도는 4예요</button>
+      <button type="button">일주일째 무릎이 아파요. 계단 오를 때 7점 정도예요</button>
+      <button type="button">어제부터 두통이 심해요 (8점)</button>
+    </div>
+    <form id="form">
+      <input id="input" type="text" placeholder="증상, 아픈 기간, 아픈 정도를 입력해 주세요" autocomplete="off" autofocus>
+      <button class="send" id="send" type="submit">전송</button>
+    </form>
+  </section>
+
+  <aside class="side">
+    <div class="panel alert">
+      <h3>⚠ 응급 상황이신가요?</h3>
+      <p>심한 흉통, 호흡곤란, 의식저하, 마비, 대량 출혈이 있다면 예약 대신 <b>즉시 119</b>에 연락하거나 응급실로 가세요.</p>
+    </div>
+    <div class="panel">
+      <h3>이용 방법</h3>
+      <ul class="steps">
+        <li>증상·기간·아픈 정도 입력</li>
+        <li>추천 진료과 확인</li>
+        <li>예약 가능 시간 선택</li>
+        <li>이름·연락처 입력 후 예약 확정</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>진료 안내</h3>
+      <ul>
+        <li><b>진료시간</b> 평일 09:00~11:30</li>
+        <li><b></b> 평일 13:00~16:30</li>
+        <li><b>휴진</b> 토·일·공휴일</li>
+        <li><b>응급실</b> 24시간 운영</li>
+      </ul>
+    </div>
+  </aside>
+</main>
+<p class="notice">본 서비스는 학습용 데모이며 진단이 아닌 참고용 안내입니다. 실제 개인정보를 입력하지 마세요.</p>
 
 <script>
   const chat = document.getElementById("chat");
@@ -59,27 +151,38 @@
   const input = document.getElementById("input");
   const send = document.getElementById("send");
   const chips = document.getElementById("chips");
+  const CROSS = '<svg viewBox="0 0 24 24"><path fill="#fff" d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>';
 
   let sessionId = null;
   try { sessionId = localStorage.getItem("sid"); } catch (e) {}
 
   function add(text, who) {
-    const d = document.createElement("div");
-    d.className = "msg " + who;
-    d.textContent = text;          // textContent: 모델 응답을 HTML로 해석하지 않음
-    chat.appendChild(d);
+    const row = document.createElement("div");
+    row.className = "row " + who;
+    if (who !== "user") {
+      const av = document.createElement("div");
+      av.className = "avatar";
+      av.innerHTML = CROSS;          // 고정 아이콘만 innerHTML 사용
+      row.appendChild(av);
+    }
+    const m = document.createElement("div");
+    m.className = "msg";
+    m.textContent = text;            // 모델 응답은 textContent로 (HTML 해석 방지)
+    row.appendChild(m);
+    chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
-    return d;
+    return row;
   }
 
   function greet() {
-    add("안녕하세요! 어디가 어떻게 불편하세요? 증상, 아픈 기간, 아픈 정도(1~10)를 알려주세요.", "bot");
+    add("안녕하세요, 대학병원 AI 진료 상담입니다.\n어디가 어떻게 불편하세요? 증상, 아픈 기간, 아픈 정도(1~10)를 알려주시면 알맞은 진료과를 안내하고 예약을 도와드릴게요.", "bot");
   }
 
   async function ask(text) {
     chips.style.display = "none";
     add(text, "user");
-    const wait = add("답변 작성 중...", "bot typing");
+    const wait = add("답변 작성 중", "bot typing");
+    const msg = wait.querySelector(".msg");
     send.disabled = true;
     try {
       const res = await fetch("/api/chat", {
@@ -92,12 +195,11 @@
         sessionId = data.session_id;
         try { localStorage.setItem("sid", sessionId); } catch (e) {}
       }
-      wait.className = "msg bot";
-      wait.textContent = data.reply || data.error || "오류가 발생했습니다.";
+      msg.textContent = data.reply || data.error || "오류가 발생했습니다.";
     } catch (e) {
-      wait.className = "msg bot";
-      wait.textContent = "서버에 연결할 수 없습니다. python app.py 가 실행 중인지 확인하세요.";
+      msg.textContent = "서버에 연결할 수 없습니다. python app.py 가 실행 중인지 확인하세요.";
     }
+    wait.classList.remove("typing");
     send.disabled = false;
     input.focus();
     chat.scrollTop = chat.scrollHeight;
