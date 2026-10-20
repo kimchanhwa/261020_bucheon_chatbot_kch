@@ -17,7 +17,14 @@ Groq 한도가 소진되거나 오류가 나면 **Gemini API로 자동 전환**�
 | `.gitignore` | `.env`, `bookings.json` 등 비공개 파일 제외 |
 | `bookings.json` | 예약 저장 파일 (예약 시 자동 생성, 개인정보라 커밋 제외) |
 
+## 준비물
+- **Python 3.8 이상** (`python --version`으로 확인), **git**
+- **Groq API 키** (필수, 무료 발급): https://console.groq.com/keys
+- Gemini API 키 (선택, Groq 한도 소진 시 대체용): https://aistudio.google.com/apikey
+
 ## 사용법
+아래 명령은 모두 터미널(PowerShell, 명령 프롬프트, VS Code 터미널)에서 실행합니다.
+
 1. 저장소 받기
    ```bash
    git clone https://github.com/kimchanhwa/261020_bucheon_chatbot_kch.git
@@ -37,11 +44,22 @@ Groq 한도가 소진되거나 오류가 나면 **Gemini API로 자동 전환**�
    GEMINI_API_KEY=발급받은_gemini_키    # https://aistudio.google.com/apikey (선택, 폴백용)
    ```
 4. 실행 (둘 중 선택)
-   - **웹 화면**: 아래 실행 후 브라우저에서 http://127.0.0.1:5000 접속
+   - **웹 화면**: 아래 실행 후 브라우저 주소창에 http://127.0.0.1:5000 을 입력해 접속
      ```bash
      python app.py
      ```
+     - 서버가 켜져 있는 동안 터미널을 닫지 마세요. 끄려면 `Ctrl+C`.
+     - `index.html` 파일을 직접 더블클릭해서 열면 서버에 연결되지 않습니다. 반드시 위 주소로 접속하세요.
    - **터미널**: `python chatbot.py` (종료는 `exit`)
+
+## 문제 해결
+| 증상 | 해결 |
+|---|---|
+| `.env에 GROQ_API_KEY(또는 GEMINI_API_KEY)를 설정하세요` | `.env` 파일을 만들고 키를 넣었는지, 프로젝트 폴더에 있는지 확인 |
+| `서버에 연결할 수 없습니다` (웹) | `python app.py`가 실행 중인지, 주소가 `http://127.0.0.1:5000`인지 확인 |
+| `python`/`pip`/`git`을 찾을 수 없음 | 설치 후 터미널(VS Code)을 완전히 닫았다가 다시 열기. `python` 대신 `py` 또는 `python3`를 써 보세요 |
+| Groq 한도 초과/오류 | `.env`에 `GEMINI_API_KEY`를 넣으면 자동으로 Gemini로 전환 |
+| 포트 5000이 이미 사용 중 | 기존 서버를 `Ctrl+C`로 끄거나 `app.py` 마지막 줄의 `port=5000`을 다른 번호로 변경 |
 
 ## 대화 예시
 ```

@@ -10,8 +10,14 @@ from groq import Groq, RateLimitError, APIStatusError, APIConnectionError
 
 # 1. 환경 변수 불러오기 (.env)
 load_dotenv()
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+def get_key(name):
+    """비어 있거나 .env.example의 예시값(your_...)이면 키가 없는 것으로 처리"""
+    value = (os.getenv(name) or "").strip()
+    return None if not value or value.startswith("your_") else value
+
+
+GROQ_API_KEY = get_key("GROQ_API_KEY")
+GEMINI_API_KEY = get_key("GEMINI_API_KEY")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
