@@ -20,7 +20,7 @@ Groq 한도가 소진되거나 오류가 나면 **Gemini API로 자동 전환**�
 ## 사용법
 1. 저장소 받기
    ```bash
-   git clone https://github.com/<계정>/261020_bucheon_chatbot_kch.git
+   git clone https://github.com/kimchanhwa/261020_bucheon_chatbot_kch.git
    cd 261020_bucheon_chatbot_kch
    ```
 2. 라이브러리 설치
