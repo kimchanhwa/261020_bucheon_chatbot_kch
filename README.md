@@ -28,6 +28,10 @@ Groq 한도가 소진되거나 오류가 나면 **Gemini API로 자동 전환**�
    pip install -r requirements.txt
    ```
 3. 환경변수 설정: `.env.example`을 `.env`로 복사한 뒤 키 입력
+   ```bash
+   copy .env.example .env
+   ```
+   (macOS/Linux는 `cp .env.example .env`) 복사한 `.env` 파일을 열어 아래처럼 키를 넣습니다.
    ```
    GROQ_API_KEY=발급받은_groq_키        # https://console.groq.com/keys
    GEMINI_API_KEY=발급받은_gemini_키    # https://aistudio.google.com/apikey (선택, 폴백용)
